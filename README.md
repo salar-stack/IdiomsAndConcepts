@@ -99,4 +99,161 @@ It often combines data from multiple sources, processes it, or transforms it in 
 
 ## Encapsulation
 
+## Domain Model
+In web programming, a domain model refers to the conceptual representation of the core business entities, rules, and logic of a specific domain or problem space. It is an abstraction that reflects real-world processes, objects, and relationships, and it helps developers understand and manage the complexities of the business logic behind an application.
+
+#### Key Characteristics of a Domain Model:
+Real-World Representation: The domain model reflects real-world entities relevant to the business, such as "Customer", "Order", "Product", etc. These entities are modeled as classes or objects in object-oriented programming (OOP).
+
+##### Business Logic Encapsulation:
+A domain model encapsulates the business rules and logic. Instead of scattering business logic across multiple parts of the system (like controllers or services), it keeps these rules inside the domain entities. For example, an Order entity would contain the logic for calculating the total price or applying discounts.
+
+##### Separation of Concerns:
+The domain model is separate from other layers of the application like the user interface (UI), data access, or infrastructure. This separation ensures that the core business logic is not dependent on external factors like the database or how data is presented.
+
+##### Entities and Value Objects:
+Entities are objects that have a distinct identity and can be uniquely identified. For example, a Customer entity has an ID that distinguishes one customer from another.
+Value Objects represent concepts without a unique identity, such as a Money or Address. They are immutable and their equality is based on their values rather than identity.
+
+##### Relationships:
+The domain model defines the relationships between entities. For example, an Order might have many OrderItem objects, or a Customer might place multiple Orders.
+
+##### Aggregates:
+A group of related entities is called an aggregate. One entity, called the aggregate root, controls the lifecycle of the entire aggregate. For instance, an Order entity might be an aggregate root that controls its associated OrderItems.
+
+Example of a Domain Model in E-commerce
+Let's consider an e-commerce application where customers place orders for products. The domain model might look like this:
+
+Entities:
+
+Customer: Represents a user of the system who places orders.
+Order: Represents a customer's purchase. It would include logic for calculating the total price, applying discounts, etc.
+Product: Represents a sellable item.
+Value Objects:
+
+Address: Represents a customer's shipping or billing address.
+Money: Represents monetary values, possibly with currency.
+Relationships:
+
+A Customer has a collection of Orders.
+An Order contains a list of OrderItems, each linked to a Product.
+Example in C#
+Here’s a simple example of a domain model for an e-commerce system using C#:
+```
+public class Customer
+{
+    public Guid CustomerId { get; private set; }
+    public string Name { get; private set; }
+    public Address ShippingAddress { get; private set; }
+    
+    public Customer(Guid customerId, string name, Address shippingAddress)
+    {
+        CustomerId = customerId;
+        Name = name;
+        ShippingAddress = shippingAddress;
+    }
+
+    // Additional customer logic can go here
+}
+
+public class Order
+{
+    public Guid OrderId { get; private set; }
+    public Customer Customer { get; private set; }
+    public List<OrderItem> Items { get; private set; }
+    public decimal TotalAmount { get; private set; }
+
+    public Order(Customer customer)
+    {
+        OrderId = Guid.NewGuid();
+        Customer = customer;
+        Items = new List<OrderItem>();
+    }
+
+    public void AddItem(Product product, int quantity)
+    {
+        var orderItem = new OrderItem(product, quantity);
+        Items.Add(orderItem);
+        CalculateTotalAmount();
+    }
+
+    private void CalculateTotalAmount()
+    {
+        TotalAmount = Items.Sum(item => item.GetTotalPrice());
+    }
+}
+
+public class Product
+{
+    public Guid ProductId { get; private set; }
+    public string Name { get; private set; }
+    public decimal Price { get; private set; }
+
+    public Product(Guid productId, string name, decimal price)
+    {
+        ProductId = productId;
+        Name = name;
+        Price = price;
+    }
+}
+
+public class OrderItem
+{
+    public Product Product { get; private set; }
+    public int Quantity { get; private set; }
+
+    public OrderItem(Product product, int quantity)
+    {
+        Product = product;
+        Quantity = quantity;
+    }
+
+    public decimal GetTotalPrice()
+    {
+        return Product.Price * Quantity;
+    }
+}
+
+public class Address
+{
+    public string Street { get; private set; }
+    public string City { get; private set; }
+    public string ZipCode { get; private set; }
+
+    public Address(string street, string city, string zipCode)
+    {
+        Street = street;
+        City = city;
+        ZipCode = zipCode;
+    }
+}
+
+```
+
+
+### Immutable 
+refers to an object whose state cannot be changed after it is created. In programming, once an immutable object is initialized with specific values, those values cannot be altered. Instead, if any modifications are required, a new object is typically created with the updated values.
+```
+public class Address
+{
+    public string Street { get; }
+    public string City { get; }
+    public string ZipCode { get; }
+
+    public Address(string street, string city, string zipCode)
+    {
+        Street = street;
+        City = city;
+        ZipCode = zipCode;
+    }
+
+    // The properties have no setters, so they cannot be changed after initialization.
+
+    // To "change" the address, we create a new instance with updated values.
+    public Address ChangeStreet(string newStreet)
+    {
+        return new Address(newStreet, this.City, this.ZipCode);
+    }
+}
+```
 
